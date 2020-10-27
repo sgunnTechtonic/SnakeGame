@@ -21,14 +21,28 @@
                     "#             #",
                     "###############"
                 ],
+                fruit: [
+                    {x: 1, y:1}
+                ],
                 tick: function() {
                     window.clearTimeout(game.timer);
                     game.tickNumber++;
-                    snake.move();
+                    var result = snake.move();
+                    if(result == "gameover") {
+                        alert("Game Over!");
+                        return;
+                    }
                     graphics.drawGame();
                     game.timer = window.setTimeout("game.tick()", 500);
+                },
+                isEmpty: function(location){
+                    return game.board[location.y][location.x] == ' ';
+                },
+                isWall: function(location) {
+                    return game.board[location.y][location.x] == '#';
                 }
-            };
+            }
+        
             var snake = {
                 parts: [
                     {x: 4, y: 2},
@@ -48,8 +62,13 @@
                 },
                 move: function() {
                     var location = snake.nextLocation();
+                    if(game.isEmpty(location)) {
                     snake.parts.unshift(location);
                     snake.parts.pop();
+                    }
+                    if(game.isWall(location)) {
+                        return "gameover";
+                    }
                 }
             };
         var graphics = {
@@ -78,11 +97,20 @@
                     ctx.fillRect(partXlocation, partYlocation, graphics.squareSize, graphics.squareSize);
                 });
             },
+            drawFruit: function(ctx) {
+                game.fruit.forEach(function(part) {
+                    var partXlocation = part.x * graphics.squareSize;
+                    var partYlocation = part.y * graphics.squareSize;
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(partXlocation, partYlocation, graphics.squareSize, graphics.squareSize);
+                });
+            },
             drawGame: function () {
                 var ctx = graphics.canvas.getContext("2d");
                 ctx.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
                 graphics.drawBoard(ctx);
                 graphics.drawSnake(ctx);
+                graphics.drawFruit(ctx);
             }
         };
         var gameControl = {
